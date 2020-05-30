@@ -20,10 +20,8 @@ $variations = $product->get_available_variations();
 
 $allowedSweets = [];
 foreach ($variations as $variation) {
-// $variation = new WC_Product_Variation($variation->variation_id);
     $id = $variation['variation_id'];
     array_push($allowedSweets, get_post_meta($id, '_text_field', true));
-    $pricingData[$variation['attributes']['attribute_color']] = $variation['price_html'];
 }
 print_r($pricingData);
 $totalPicks = 10;
@@ -54,7 +52,7 @@ echo $price;
 
         <?php foreach ($attributes as $attribute_name => $options): ?>
 					<tr>
-						<td class="label"><label for="<?php echo esc_attr(sanitize_title($attribute_name)); ?>"><?php echo wc_attribute_label($attribute_name); // WPCS: XSS ok.                                        ?></label></td>
+						<td class="label"><label for="<?php echo esc_attr(sanitize_title($attribute_name)); ?>"><?php echo wc_attribute_label($attribute_name); // WPCS: XSS ok.                                            ?></label></td>
 						<td class="value">
 							<?php
 wc_dropdown_variation_attribute_options(

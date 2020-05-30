@@ -10,7 +10,7 @@ class ProductBackendTemplate
     {
         // Shows product variations and attributes tabs if
         add_filter('woocommerce_product_data_tabs', array($this, 'wcs_show_attributes_data_panel'), 10, 1);
-        add_action('admin_footer', array($this, 'simple_rental_custom_js'));
+        add_action('admin_footer', array($this, 'show_variable_product_options'));
         add_action('woocommerce_variation_options_pricing', array($this, 'add_custom_field_to_variations'), 10, 3);
         add_action('woocommerce_save_product_variation', array($this, 'save_custom_field_variations'), 10, 2);
         // add_filter('woocommerce_available_variation', array($this, 'add_custom_field_variation_data'));
@@ -56,7 +56,7 @@ class ProductBackendTemplate
 
     }
 
-    public function simple_rental_custom_js()
+    public function show_variable_product_options()
     {
 
         if ('product' != get_post_type()):
