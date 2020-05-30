@@ -4,7 +4,7 @@
  * @package WoocommerceProductOptions
  */
 
-class Dectivate_Woocommerce_Product_Options
+class Deactivate_Woocommerce_Product_Options
 {
 
     public static function deactivate()
