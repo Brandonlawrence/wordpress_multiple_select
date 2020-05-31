@@ -16,7 +16,7 @@ $variations_attr = function_exists('wc_esc_json') ? wc_esc_json($variations_json
 
 do_action('pickandmix_before_add_to_cart_form');?>
 
-<form class="pickandmix_cart" method="post" enctype='multipart/form-data'>
+<form class="pickandmix_cart cart" >
 <div id='variation-alert'></div>
 <?php do_action('pickandmix_before_variations_form');?>
 <?php if (empty($available_variations) && false !== $available_variations): ?>
@@ -26,7 +26,7 @@ do_action('pickandmix_before_add_to_cart_form');?>
 			<tbody>
 				<?php foreach ($attributes as $attribute_name => $options): ?>
 					<tr>
-						<td class="label"><label for="<?php echo esc_attr(sanitize_title($attribute_name)); ?>"><?php echo wc_attribute_label($attribute_name); // WPCS: XSS ok.        ?></label></td>
+						<td class="label"><label for="<?php echo esc_attr(sanitize_title($attribute_name)); ?>"><?php echo wc_attribute_label($attribute_name); // WPCS: XSS ok.                ?></label></td>
 						<td class="value">
 							<?php
 wc_dropdown_variation_attribute_options(
@@ -46,6 +46,7 @@ echo end($attribute_keys) === $attribute_name ? wp_kses_post(apply_filters('wooc
 		</table>
         <?php endif;?>
         <div id="related-products"></div>
+        <button type="submit" name="cart" class="single_add_to_cart_button button alt"><?php echo esc_html($product->single_add_to_cart_text()); ?></button>
 </form>
 
 <?php do_action('pickandmix_after_add_to_cart_form');?>
