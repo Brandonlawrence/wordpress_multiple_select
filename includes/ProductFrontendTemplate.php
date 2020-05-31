@@ -155,8 +155,7 @@ class ProductFrontendTemplate
         if ('pickandmix' === $product->get_type()) {
             $template_path = plugin_dir_path(__FILE__) . 'templates/';
             //Load the template
-            wc_get_template('pickandmix.php', $data, '', trailingslashit($template_path),
-            );
+            wc_get_template('pickandmix.php', $data, '', trailingslashit($template_path));
         }
     }
 
