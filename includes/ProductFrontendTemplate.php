@@ -110,7 +110,7 @@ class ProductFrontendTemplate
     public function pick_and_mix_template()
     {
         global $product;
-        print_r($product->get_type());
+
         // Args for  Related Products
         $args = [
             'tag' => 'pick&mix',
@@ -146,11 +146,11 @@ class ProductFrontendTemplate
             'ajax_url' => admin_url('admin-ajax.php'),
             'product_id' => $product->get_id());
 
-        // Enqueue variation scripts.
-        wp_enqueue_script('pick_and_mix_frontend', PLUGIN_DIR_URL . "assets/pick-and-mix-frontend.js");
-
-        // parse data into the javascript  file
-        wp_localize_script('pick_and_mix_frontend', 'data', $data);
+        if ($product->get_type() === 'pickandmix') {
+            wp_enqueue_script('pick_and_mix_frontend', PLUGIN_DIR_URL . "assets/pick-and-mix-frontend.js");
+            // parse data into the javascript  file
+            wp_localize_script('pick_and_mix_frontend', 'data', $data);
+        }
 
         if ('pickandmix' === $product->get_type()) {
             $template_path = plugin_dir_path(__FILE__) . 'templates/';
