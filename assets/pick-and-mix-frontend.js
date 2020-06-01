@@ -153,6 +153,25 @@ Object.keys(attributes).forEach((attribute) => {
 // Get select element
 let variationSelect = document.getElementById(attribute)
 
+if(variationSelect.value){
+
+
+    const variation = findCurrentProductVariation(attribute,variationSelect.value)
+    totalProductAllowed = variation_custom_properties[variation.variation_id]
+     productsToSelect = totalProductAllowed;
+     console.log('total Product',totalProductAllowed)
+ 
+     price.innerHTML = variation.price_html
+     showRelatedProducts(false,totalProductAllowed)
+     populateRelatedProductsSelect(totalProductAllowed)
+     relatedProductSelectEventListeners(false)
+     updateVariationState({variation_id:variation.variation_id, attributes:variation.attributes})
+}
+
+
+
+
+
 //Set event listener for on change
 variationSelect.addEventListener('change', () => {
 
@@ -215,22 +234,12 @@ const validateForm = () => {
   
 }
 
-// const  SubmitFormData = (data) =>{
-//     let xhttp = new XMLHttpRequest()
-//     console.log(ajax_url)
-//     xhttp.open("POST",'/wp-admin/admin-ajax.php',true)
-//     xhttp.onreadystatechange = () => {
-//         if(xhttp.readyState == 4 && xhttp.status == 200){
-//             console.log('success',xhttp.status, xhttp.readyState)
-//         }else{
-//             console.log('failed',xhttp.status, xhttp.readyState)
-//         }
-//     }
-//     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-//     xhttp.send("action=custom_ajax_add_to_cart")
-// }
 
 
+
+
+
+// SEND INFO TO DATABASE
 (function ($) {
     $( document ).on( 'click', '.single_add_to_cart_button', function(e) {
             e.preventDefault();

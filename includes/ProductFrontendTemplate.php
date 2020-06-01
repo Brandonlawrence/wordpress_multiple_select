@@ -10,7 +10,7 @@ class ProductFrontendTemplate
     public function register()
     {
         // add_action('woocommerce_pickandmix_add_to_cart', array($this, 'woocommerce_variable_add_to_cart'), 30);
-        add_action('woocommerce_single_product_summary', array($this, 'pick_and_mix_template'), 60);
+        add_action('woocommerce_pickandmix_add_to_cart', array($this, 'pick_and_mix_template'), 60);
         add_filter('woocommerce_add_cart_item_data', array($this, 'wdm_add_item_data'), 1, 2);
         add_filter('woocommerce_get_cart_item_from_session', array($this, 'wdm_get_cart_items_from_session'), 1, 3);
         add_filter('woocommerce_get_item_data', array($this, 'wdm_add_user_custom_option_from_session_into_cart'), 1, 3);
@@ -110,6 +110,7 @@ class ProductFrontendTemplate
     public function pick_and_mix_template()
     {
         global $product;
+        // if ($product->get_type() === 'pickandmix') {
 
         // Args for  Related Products
         $args = [
@@ -146,41 +147,16 @@ class ProductFrontendTemplate
             'ajax_url' => admin_url('admin-ajax.php'),
             'product_id' => $product->get_id());
 
-        if ($product->get_type() === 'pickandmix') {
-            wp_enqueue_script('pick_and_mix_frontend', PLUGIN_DIR_URL . "assets/pick-and-mix-frontend.js");
-            // parse data into the javascript  file
-            wp_localize_script('pick_and_mix_frontend', 'data', $data);
-        }
+        wp_enqueue_script('pick_and_mix_frontend', PLUGIN_DIR_URL . "assets/pick-and-mix-frontend.js");
+        // parse data into the javascript  file
+        wp_localize_script('pick_and_mix_frontend', 'data', $data);
 
-        if ('pickandmix' === $product->get_type()) {
-            $template_path = plugin_dir_path(__FILE__) . 'templates/';
-            //Load the template
-            wc_get_template('pickandmix.php', $data, '', trailingslashit($template_path));
-        }
+        // if ('pickandmix' === $product->get_type()) {
+        $template_path = plugin_dir_path(__FILE__) . 'templates/';
+        //Load the template
+        wc_get_template('pickandmix.php', $data, '', trailingslashit($template_path));
+        // }
+        // }
     }
-
-    /**
-     * Output the variable product add to cart area.
-     */
-    // public function woocommerce_variable_add_to_cart()
-    // {
-    //     global $product;
-
-    //     // Enqueue variation scripts.
-    //     // wp_enqueue_script('wc-add-to-cart-variation', PLUGIN_DIR_URL . "assets/add-to-cart-pickandmix.js");
-
-    //     // Get Available variations?
-    //     $get_variations = count($product->get_children()) <= apply_filters('woocommerce_ajax_variation_threshold', 30, $product);
-
-    //     // Load the template.
-    //     wc_get_template(
-    //         'single-product/add-to-cart/variable.php',
-    //         array(
-    //             'available_variations' => $get_variations ? $product->get_available_variations() : false,
-    //             'attributes' => $product->get_variation_attributes(),
-    //             'selected_attributes' => $product->get_default_attributes(),
-    //         )
-    //     );
-    // }
 
 }
