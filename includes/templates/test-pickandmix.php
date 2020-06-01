@@ -7,8 +7,10 @@ if (!defined('ABSPATH')) {
 }
 
 global $product;
+$selectedTag = get_post_meta($product->get_id(), '_combo_product_tag');
+
 $args = [
-    'tag' => 'pick&mix',
+    'tag' => 'bag',
 ];
 $pickandMixProduct = wc_get_products($args);
 $optionNames = [];
@@ -23,7 +25,7 @@ foreach ($variations as $variation) {
     $id = $variation['variation_id'];
     array_push($allowedSweets, get_post_meta($id, '_text_field', true));
 }
-print_r($pricingData);
+
 $totalPicks = 10;
 foreach ($pickandMixProduct as $option) {
     array_push($optionNames, $option->get_name());
@@ -52,7 +54,7 @@ echo $price;
 
         <?php foreach ($attributes as $attribute_name => $options): ?>
 					<tr>
-						<td class="label"><label for="<?php echo esc_attr(sanitize_title($attribute_name)); ?>"><?php echo wc_attribute_label($attribute_name); // WPCS: XSS ok.                                            ?></label></td>
+						<td class="label"><label for="<?php echo esc_attr(sanitize_title($attribute_name)); ?>"><?php echo wc_attribute_label($attribute_name); // WPCS: XSS ok.                                                 ?></label></td>
 						<td class="value">
 							<?php
 wc_dropdown_variation_attribute_options(

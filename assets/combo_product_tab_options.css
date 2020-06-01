@@ -1,0 +1,12 @@
+.child-product-table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.child-product-table td,
+.child-product-table th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}

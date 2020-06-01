@@ -21,8 +21,6 @@ jQuery(document).ready(function ($) {
 }})
 
 
-
-
 $('body').on('woocommerce_added_attribute reload woocommerce-product-type-change', (e) => {
   if ($('select#product-type').val() == 'pickandmix'){
     $('.product_attributes').prepend(
@@ -52,8 +50,6 @@ $('body').on('woocommerce-product-type-change', (e) => {
   }
 
 })
-
- 
 
 
 

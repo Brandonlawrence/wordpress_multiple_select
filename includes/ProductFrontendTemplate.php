@@ -111,10 +111,21 @@ class ProductFrontendTemplate
     {
         global $product;
         // if ($product->get_type() === 'pickandmix') {
+        $selectedTag = get_post_meta($product->get_id(), '_combo_product_tag');
+        $selectedTagSlug = '';
+        $allTags = get_terms('product_tag');
+
+        if (!empty($allTags) && !is_wp_error($allTags)) {
+            foreach ($allTags as $tag) {
+                if ($tag->name == $selectedTag[0]) {
+                    $selectedTagSlug = $tag->slug;
+                }
+            }
+        }
 
         // Args for  Related Products
         $args = [
-            'tag' => 'pick&mix',
+            'tag' => $selectedTagSlug,
         ];
 
         //   Get Available variations?
@@ -131,6 +142,7 @@ class ProductFrontendTemplate
 
         // get name for related Products
         $tagged_products = wc_get_products($args);
+
         $related_products = [];
 
         foreach ($tagged_products as $tagged_product) {

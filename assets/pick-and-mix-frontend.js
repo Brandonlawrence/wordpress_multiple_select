@@ -5,6 +5,8 @@ let totalProductAllowed;
 let productsToSelect;
 let selected_variation={}
 let bundle_products=[] 
+let quantity = 1;
+let attributeName='';
 
 
 // Get data passed in
@@ -19,6 +21,25 @@ const findCurrentProductVariation = (attribute, value) => {
 
     return selectedVariation
 }
+
+const quanitityWrapper = document.querySelector('.woocommerce-variation-add-to-cart .quantity')
+
+
+const currentQuantity = quanitityWrapper.querySelector('.qty')
+
+currentQuantity.value = 1
+
+quanitityWrapper.querySelector('.plus').addEventListener('click',()=>{
+    
+    quantity += 1
+})
+
+quanitityWrapper.querySelector('.minus').addEventListener('click',()=>{
+    quantity -= 1
+})
+currentQuantity.addEventListener("change", () => {
+    quantity = currentQuantity.value + 1
+})
 
 
 
@@ -146,17 +167,35 @@ const showRelatedProducts = (isHidden, totalProductAllowed=0 ) => {
 } 
 
 
+// document.querySelector('.reset_variations').addEventListener('click',()=>{
+//     const event = new Event('change')
+//     variationSelect.dispatchEvent(event);
+    
+// })
+
 
 // For Each variation (should not have more than one but this allows dynamic name setting)
 Object.keys(attributes).forEach((attribute) => {
-
+attributeName = attribute.toLowerCase()
 // Get select element
-let variationSelect = document.getElementById(attribute)
+let variationSelect = document.getElementById(attributeName)
+
+
+document.querySelector('.reset_variations').addEventListener('click',()=>{
+      //remove price
+    // hide notice box 
+    // hide options
+    price.innerHTML = priceHTML
+    showRelatedProducts(true)
+    updateVariationState({})
+    clearBundleState()
+    validateForm()
+    
+})
+
 
 if(variationSelect.value){
-
-
-    const variation = findCurrentProductVariation(attribute,variationSelect.value)
+    const variation = findCurrentProductVariation( attributeName,variationSelect.value)
     totalProductAllowed = variation_custom_properties[variation.variation_id]
      productsToSelect = totalProductAllowed;
      console.log('total Product',totalProductAllowed)
@@ -171,7 +210,6 @@ if(variationSelect.value){
 
 
 
-
 //Set event listener for on change
 variationSelect.addEventListener('change', () => {
 
@@ -179,11 +217,10 @@ variationSelect.addEventListener('change', () => {
 
     if(variationSelect.value){
 
-   const variation = findCurrentProductVariation(attribute,variationSelect.value)
+   const variation = findCurrentProductVariation(attributeLower,variationSelect.value)
    
    totalProductAllowed = variation_custom_properties[variation.variation_id]
     productsToSelect = totalProductAllowed;
-    console.log('total Product',totalProductAllowed)
 
     price.innerHTML = variation.price_html
     showRelatedProducts(false,totalProductAllowed)
@@ -243,14 +280,14 @@ const validateForm = () => {
 (function ($) {
     $( document ).on( 'click', '.single_add_to_cart_button', function(e) {
             e.preventDefault();
-
+            
             var $thisbutton = $(this)
             const data = {
                 ...selected_variation.attributes,
                 action: 'ob_cart',
                 product_id:parseInt(product_id),
                 // "add-to-cart":parseInt(product_id),
-                quantity:1,
+                quantity,
                 bundle_data:JSON.stringify(bundle_products),
                 product_sku:'',
                 variation_id: selected_variation.variation_id
@@ -276,7 +313,12 @@ const validateForm = () => {
                         $( document.body ).trigger( 'wc_fragments_loaded' );
                         $(document.body).trigger('added_to_cart', [response.fragments,response.cart_hash, $thisbutton]);
                         $( document.body ).trigger( 'cart_page_refreshed' );
-                        // location.reload();
+                        price.innerHTML = priceHTML
+                        document.getElementById(attributeName).value = ''
+                        showRelatedProducts(true)
+                        updateVariationState({})
+                        clearBundleState()
+                        validateForm()
                     }
                 }
             })
