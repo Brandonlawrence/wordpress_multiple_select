@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @package WoocommerceProductOptions
+ * @package WoocommerceComboProduct
  */
 
-class Deactivate_Woocommerce_Product_Options
+class Deactivate_Woocommerce_Combo_Product_Plugin
 {
 
     public static function deactivate()

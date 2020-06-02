@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package WoocommerceProductOptions
+ * @package WoocommerceComboProduct
  */
 
 class ProductBackendTemplate

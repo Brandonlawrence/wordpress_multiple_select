@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @package WoocommerceProductOptions
+ * @package WoocommerceComboProduct
  */
 
-class Activate_Woocommerce_Product_Options
+class Activate_Woocommerce_Combo_Product_Plugin
 {
 
     public static function activate()
