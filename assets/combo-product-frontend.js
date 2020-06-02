@@ -3,7 +3,6 @@
 const {available_variations, attributes, related_products,variation_custom_properties, product_id, ajax_url} = data
 //used for image timeout
 var timeoutHandle = window.setTimeout(() => {},300)
-console.log(related_products);
 // GLOBAL VARIABLES 
 let totalProductAllowed = 0;
 let productsToSelect;
