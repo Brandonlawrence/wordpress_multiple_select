@@ -1,16 +1,18 @@
 jQuery(document).ready(function ($) {
 const {productsWithTags, product_type} = backendVars
 
+console.log(productsWithTags)
 const setUpHtml = (inputValue) => {
 
     let productsMatchingInput = [];
-
+    if(productsWithTags && productsWithTags.length>0){
     productsWithTags.forEach((product) => {
         const {inStock, name,tags} = product
         if(tags.find((tag) => inputValue == tag)){
             productsMatchingInput.push({name, inStock})
         }
     })
+    }
     
     if(productsMatchingInput.length > 0 ){
     
@@ -48,13 +50,6 @@ setUpHtml(inputValue)
 )
 
 
-$( 'body' ).on( 'reload woocommerce-product-type-change', () => {
-    if ($('select#product-type').val() == product_type){
 
-        let inputValue = $('#_combo_product_tag').val()
-
-        setUpHtml(inputValue)
-    }
-})
 
 })

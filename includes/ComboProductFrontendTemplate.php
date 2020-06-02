@@ -10,7 +10,7 @@ class ComboProductFrontendTemplate
 
     public function register()
     {
-        // add_action('woocommerce_pickandmix_add_to_cart', array($this, 'woocommerce_variable_add_to_cart'), 30);
+
         //Get the custom Combo Product data from the created session and puts it in to the cart data (Backend data)
         add_filter('woocommerce_get_cart_item_from_session', array($this, 'get_custom_cart_items_from_session'), 1, 3);
         // Adds the custom Combo Product data to the cart page when product is added (Backend Data)
@@ -23,8 +23,7 @@ class ComboProductFrontendTemplate
         add_action('woocommerce_before_cart_item_quantity_zero', array($this, 'remove_custom_data_options_from_cart'), 1, 1);
         // Creates the combo product page (loads the JS for the view and adds the template)
         add_action('woocommerce_' . PRODUCT_TYPE . '_add_to_cart', array($this, 'combo_product_template'), 60);
-        // add_filter('woocommerce_cart_item_price', array($this, 'add_custom_options_from_session_into_cart'), 1, 3);
-        // add_action('wp_enqueue_scripts', array($this, 'combo_product_ajax_add_to_cart_js'), 99);
+        // Triggered when data is sent via ajax to the backend -> deals with the process of adding data to the database and triggering add to cart actions
         add_action('wp_ajax_combo_product_add_to_cart', array($this, 'combo_product_ajax_add_to_cart'), 1);
         add_action('wp_ajax_nopriv_combo_product_add_to_cart', array($this, 'combo_product_ajax_add_to_cart'), 1);
 
@@ -99,7 +98,7 @@ class ComboProductFrontendTemplate
     public function remove_custom_data_options_from_cart($cart_item_key)
     {
         global $woocommerce;
-        // Get cart
+        // Get cart data
         $cart = $woocommerce->cart->get_cart();
         // For each item in cart, if item is upsell of deleted product, delete it
         foreach ($cart as $key => $values) {
@@ -110,49 +109,14 @@ class ComboProductFrontendTemplate
         }
     }
 
-    // TO FIX
     public function combo_product_template()
     {
-        ComboProductHelperFunctions::help();
         global $product;
-        // if ($product->get_type() === 'pickandmix') {
-        $selectedTag = get_post_meta($product->get_id(), '_combo_product_tag');
-        $selectedTagSlug = '';
-        $allTags = get_terms('product_tag');
 
-        if (!empty($allTags) && !is_wp_error($allTags)) {
-            foreach ($allTags as $tag) {
-                if ($tag->name == $selectedTag[0]) {
-                    $selectedTagSlug = $tag->slug;
-                }
-            }
-        }
-
-        // Args for  Related Products
-        $args = [
-            'tag' => $selectedTagSlug,
-        ];
-
-        //   Get Available variations?
         $get_variations = count($product->get_children()) <= apply_filters('woocommerce_ajax_variation_threshold', 30, $product);
         $available_variations = $get_variations ? $product->get_available_variations() : false;
-        $variation_custom_properties = [];
-
-        if ($available_variations) {
-            foreach ($available_variations as $variation) {
-                $id = $variation['variation_id'];
-                $variation_custom_properties[$id] = get_post_meta($id, '_child_product_count', true);
-            }
-        }
-
-        // get name for related Products
-        $tagged_products = wc_get_products($args);
-
-        $related_products = [];
-
-        foreach ($tagged_products as $tagged_product) {
-            $related_products[] = $tagged_product->get_name();
-        }
+        $variation_custom_properties = ComboProductHelperFunctions::get_custom_properties_for_variations($available_variations);
+        $childProducts = ComboProductHelperFunctions::get_data_for_combo_child_products($product->get_id());
 
         // Data to pass into the script to deal with the variaton data
         $data = array(
@@ -160,7 +124,7 @@ class ComboProductFrontendTemplate
             'attributes' => $product->get_variation_attributes(),
             'selected_attributes' => $product->get_default_attributes(),
             'variation_custom_properties' => $variation_custom_properties,
-            'related_products' => $related_products,
+            'related_products' => $childProducts,
             'ajax_url' => admin_url('admin-ajax.php'),
             'product_id' => $product->get_id());
 
@@ -168,12 +132,10 @@ class ComboProductFrontendTemplate
         // parse data into the javascript  file
         wp_localize_script('combo-product-frontend', 'data', $data);
 
-        // if ('pickandmix' === $product->get_type()) {
         $template_path = plugin_dir_path(__FILE__) . 'templates/';
         //Load the template
         wc_get_template('combo-product-frontend.php', $data, '', trailingslashit($template_path));
-        // }
-        // }
+
     }
 
     public function combo_product_ajax_add_to_cart()
@@ -184,11 +146,11 @@ class ComboProductFrontendTemplate
         $variation_id = absint($_POST['variation_id']);
         $passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity);
         $product_status = get_post_status($product_id);
-        $user_custom_data_values = $_POST['bundle_data'];
-        // if ($_SESSION) {
+        $custom_data_values = $_POST['bundle_data'];
+
         session_start();
         session_unset();
-        $_SESSION['combo_product_custom_data'] = $user_custom_data_values;
+        $_SESSION['combo_product_custom_data'] = $custom_data_values;
 
         if ($passed_validation && WC()->cart->add_to_cart($product_id, $quantity, $variation_id) && 'publish' === $product_status) {
 

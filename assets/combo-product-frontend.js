@@ -90,14 +90,24 @@ const showChildProducts = () => {
     if(variationInfoAlert){
     variationInfoAlert.innerHTML += `<div class='woocommerce-message'> You may pick a total of ${totalProductAllowed} items</div>`
     related_products.forEach((item,index)=> {
-        childProductsDisplay.innerHTML += `<div class="related-product-data">
+        childProductsDisplay.innerHTML += `<div class="related-product-data ${!item.inStock && 'related-out-of-stock'}">
         <span class="bundle-product-name">
-        ${item}
+        ${item.name}${!item.inStock ? " (Out of Stock)": ''}
     </span>
-            <select class="related-product-select"> 
+            <select class="related-product-select">
             </select>
+            
         </div>`
     }) 
+
+    const outOfStockProducts = document.querySelectorAll('.related-out-of-stock .related-product-select')
+    console.log(outOfStockProducts)
+    if(outOfStockProducts.length > 0){
+        outOfStockProducts.forEach(dropdown => {
+            dropdown.disabled = true;
+        })
+    }
+
 
     }
 
@@ -360,7 +370,7 @@ if (variationSelect){
             var $thisbutton = $(this)
             const data = {
                 ...selected_variation.attributes,
-                action: 'ob_cart',
+                action: 'combo_product_add_to_cart',
                 product_id:parseInt(product_id),
                 // "add-to-cart":parseInt(product_id),
                 quantity,

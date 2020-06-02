@@ -7,6 +7,7 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+global $product;
 
 ?><div id='combo_product_options' class='panel woocommerce_options_panel'><?php
 ?><div class='options_group'><?php
@@ -17,7 +18,6 @@ woocommerce_wp_text_input(array(
     'placeholder' => '',
     'required' => true,
     'desc_tip' => true,
-    'custom_attributes' => array('required' => 'required'),
     'description' => __("Please enter the tag name, this will be the tag value that you will use to tag children products so they appear in the combo product, make sure it's a unqiue tag and avoid using spaces", 'wcpt'),
 ));
 

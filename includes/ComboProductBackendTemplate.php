@@ -4,6 +4,7 @@
  * @package WoocommerceComboProduct
  */
 
+require_once plugin_dir_path(__FILE__) . 'ComboProductHelperFunctions.php';
 class ComboProductBackendTemplate
 {
     public function register()
@@ -65,7 +66,6 @@ class ComboProductBackendTemplate
     public function save_custom_field_variations($variation_id)
     {
         global $variation;
-
         $custom_field = $_POST['_child_product_count'];
         if (isset($custom_field)) {
             update_post_meta($variation_id, '_child_product_count', esc_attr($custom_field));
@@ -77,36 +77,10 @@ class ComboProductBackendTemplate
     {
         global $product;
 
-        $terms = get_terms('product_tag');
-        $term_array = array();
-        if (!empty($terms) && !is_wp_error($terms)) {
-            foreach ($terms as $term) {
-                $term_array[] = $term->name;
-            }
-        }
-
-        $args = [
-            'limit' => 1000,
-            'tag' => $term_array,
-        ];
-
-        // get name for related Products
-        $tagged_products = wc_get_products($args);
-        $related_products = [];
-
-        foreach ($tagged_products as $tagged_product) {
-
-            $productTagsRaw = wp_get_post_terms($tagged_product->get_id(), 'product_tag');
-            $productTags = [];
-            foreach ($productTagsRaw as $productTag) {
-                $productTags[] = $productTag->name;
-            }
-
-            $related_products[] = ['name' => $tagged_product->get_name(), 'inStock' => $tagged_product->is_in_stock(), 'tags' => $productTags];
-        }
+        $tagged_products_with_data = ComboProductHelperFunctions::get_data_for_all_products_with_tags();
 
         $data = array(
-            'productsWithTags' => $related_products,
+            'productsWithTags' => $tagged_products_with_data,
             'product_type' => PRODUCT_TYPE,
         );
 
