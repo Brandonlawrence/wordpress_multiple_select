@@ -1,7 +1,7 @@
 
 // DATA PASSED IN 
 const {available_variations, attributes, related_products,variation_custom_properties, product_id, ajax_url} = data
-
+console.log(related_products)
 // GLOBAL VARIABLES 
 let totalProductAllowed = 0;
 let productsToSelect;
@@ -180,7 +180,7 @@ const resetPriceHTML =  () =>{
 // FIND THE CURRENT CHILD PRODUCT NAME FROM AN INDEX 
 const getChildProductName = (index=0) => {
     // make sure index is valid and that the  array exists
-    if(childProductNameFields.length > 0 && index < childProductNameFields.length -1 ){
+    if(childProductNameFields.length > 0 && index <= childProductNameFields.length - 1){
         return childProductNameFields[index].textContent.trim()
     }else{
         return ''

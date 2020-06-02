@@ -1,10 +1,9 @@
 jQuery(document).ready(function ($) {
-const {productsWithTags} = backend_vars
-  
+const {productsWithTags, product_type} = backendVars
+
 const setUpHtml = (inputValue) => {
 
     let productsMatchingInput = [];
-
 
     productsWithTags.forEach((product) => {
         const {inStock, name,tags} = product
@@ -48,5 +47,14 @@ setUpHtml(inputValue)
 }
 )
 
+
+$( 'body' ).on( 'reload woocommerce-product-type-change', () => {
+    if ($('select#product-type').val() == product_type){
+
+        let inputValue = $('#_combo_product_tag').val()
+
+        setUpHtml(inputValue)
+    }
+})
 
 })

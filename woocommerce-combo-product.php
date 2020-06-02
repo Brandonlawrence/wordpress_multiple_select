@@ -23,8 +23,8 @@ define("PRODUCT_TYPE", 'combo_product');
 
 require_once plugin_dir_path(__FILE__) . 'includes/Enqueue.php';
 require_once plugin_dir_path(__FILE__) . 'includes/InitaliseProductSettings.php';
-require_once plugin_dir_path(__FILE__) . 'includes/ProductBackendTemplate.php';
-require_once plugin_dir_path(__FILE__) . 'includes/ProductFrontendTemplate.php';
+require_once plugin_dir_path(__FILE__) . 'includes/ComboProductBackendTemplate.php';
+require_once plugin_dir_path(__FILE__) . 'includes/ComboProductFrontendTemplate.php';
 
 if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
 
@@ -38,8 +38,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $this->classes = [
                 'Enqueue',
                 'InitaliseProductSettings',
-                'ProductBackendTemplate',
-                'ProductFrontendTemplate',
+                'ComboProductBackendTemplate',
+                'ComboProductFrontendTemplate',
             ];
 
         }
