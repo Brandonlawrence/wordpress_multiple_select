@@ -1,7 +1,6 @@
 jQuery(document).ready(function ($) {
 const {productsWithTags, product_type} = backendVars
 
-console.log(productsWithTags)
 const setUpHtml = (inputValue) => {
 
     let productsMatchingInput = [];

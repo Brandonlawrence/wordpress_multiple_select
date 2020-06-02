@@ -1,7 +1,6 @@
 
 // DATA PASSED IN 
 const {available_variations, attributes, related_products,variation_custom_properties, product_id, ajax_url} = data
-console.log(related_products)
 // GLOBAL VARIABLES 
 let totalProductAllowed = 0;
 let productsToSelect;
@@ -101,7 +100,6 @@ const showChildProducts = () => {
     }) 
 
     const outOfStockProducts = document.querySelectorAll('.related-out-of-stock .related-product-select')
-    console.log(outOfStockProducts)
     if(outOfStockProducts.length > 0){
         outOfStockProducts.forEach(dropdown => {
             dropdown.disabled = true;
