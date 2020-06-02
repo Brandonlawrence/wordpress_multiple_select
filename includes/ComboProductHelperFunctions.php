@@ -52,7 +52,12 @@ class ComboProductHelperFunctions
 
             foreach ($tagged_products as $tagged_product) {
 
-                $childProducts[] = ["name" => $tagged_product->get_name(), 'inStock' => $tagged_product->is_in_stock()];
+                $mainImageId = $tagged_product->get_image_id();
+                $imageUrl = false;
+                if ($mainImageId) {
+                    $imageUrl = wp_get_attachment_url($mainImageId);
+                }
+                $childProducts[] = ["name" => $tagged_product->get_name(), 'inStock' => $tagged_product->is_in_stock(), 'imageUrl' => $imageUrl];
             }
         }
         return $childProducts;

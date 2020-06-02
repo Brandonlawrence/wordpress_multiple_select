@@ -1,6 +1,9 @@
 
 // DATA PASSED IN 
 const {available_variations, attributes, related_products,variation_custom_properties, product_id, ajax_url} = data
+//used for image timeout
+var timeoutHandle = window.setTimeout(() => {},300)
+console.log(related_products);
 // GLOBAL VARIABLES 
 let totalProductAllowed = 0;
 let productsToSelect;
@@ -8,6 +11,7 @@ let selected_variation={}
 let childProducts = []
 let quantity = 1;
 let attributeName='';
+
 
 
 // GLOBAL DOM ELEMENTS
@@ -21,6 +25,7 @@ let childProductSelectFields =  document.querySelectorAll('.related-product-sele
 let childProductNameFields;
 let submitFormButton = document.querySelector('.single_add_to_cart_button')
 let initialPriceHTML;
+let initialImageElement;
 
 //GET VARIATION SELECT ELEMENT
 if (Object.keys(attributes).length > 0){
@@ -74,6 +79,36 @@ const updateVariationState = (data={},clearState=false) => {
 
 
 // //// FUNCTIONS FOR GENERATING/ REMOVING  DOM ELEMENTS //// ////
+
+
+  // REPLACES THE CURRENT IMAGE OF THE CHILD PRODUCT WITH THE ORIGINAL ONE FOR THE VARIATION OF THE PRODUCT
+    const resetImageUrl = () =>{
+        currentImageElement = document.querySelector('.woocommerce-product-gallery__wrapper')
+    if(initialImageElement){
+        currentImageElement.outerHTML = initialImageElement.outerHTML
+    }
+    }
+    
+    //REPLACES THE MAIN VARIATION IMAGE WITH A CHILD IMAGE FOR A DURATION OF 3 SECONDS AND THEN SETS IT BACK
+    const setVariationImage = (url) => {
+    const imageElement = document.querySelector('.woocommerce-product-gallery__wrapper')
+    const zoomButton = document.querySelector('.zoom-button')
+    
+    if(imageElement){
+        imageElement.outerHTML = `<img style="width:100%;"src="${url}" class="woocommerce-product-gallery__wrapper"/>`
+        window.clearTimeout(timeoutHandle)
+        timeoutHandle = window.setTimeout(()=>{
+            resetImageUrl()
+            if(zoomButton){
+                zoomButton.style.display='block'
+            }
+        },3000)
+    }
+    if(zoomButton){
+        zoomButton.style.display = 'none';
+    }
+    }
+    
 
 //Hides all information related to the child products if they exist on the page
 const hideChildProducts = () =>{
@@ -185,6 +220,12 @@ const resetPriceHTML =  () =>{
 
 /// // MISC GETTER FUNCTIONS  // /// 
 
+// GET THE CURRENT IMAGE HTML DISPLAYED 
+const getInitialImageElement = () => {
+    initialImageElement = document.querySelector('.woocommerce-product-gallery__wrapper')
+}
+  
+
 // FIND THE CURRENT CHILD PRODUCT NAME FROM AN INDEX 
 const getChildProductName = (index=0) => {
     // make sure index is valid and that the  array exists
@@ -244,6 +285,7 @@ const setFormState = () => {
     setChildProductSelectEventListeners()
     updateVariationState({variation_id:rawVarationData.variation_id, rawVarationData:rawVarationData.attributes})
     clearChildProductState()
+    getInitialImageElement();
     validateForm()
     }
 }
@@ -265,6 +307,12 @@ const setChildProductSelectEventListeners = (remove=false) => {
                 updateChildProductState({name:childProductName, value:dropdown.value})
                 populateChildProductsSelect()
                 validateForm()
+            })
+
+            dropdown.addEventListener('click',()=>{
+                if(related_products[index].imageUrl){
+                setVariationImage(related_products[index].imageUrl)
+                }
             })
 
         }else{
@@ -343,6 +391,7 @@ const setResetVarationsEventListener = () => {
 
 // RUN PROGRAMME
 if (variationSelect){
+    getInitialImageElement();
     getInitialPriceHTML()
     setQuantityEventListeners()
     setVariationSelectEventListener()

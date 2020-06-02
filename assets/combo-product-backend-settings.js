@@ -1,5 +1,6 @@
 jQuery(document).ready(function ($) {
   const {product_type} = backend_vars
+  
   // Variable type options are valid for variable workshop.
   $( '.show_if_variable:not(.hide_if_pickandmix)' ).addClass( `show_if_${product_type}` );
 
