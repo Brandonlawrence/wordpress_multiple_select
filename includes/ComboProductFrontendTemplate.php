@@ -4,6 +4,7 @@
  * @package WoocommerceComboProduct
  */
 
+require_once plugin_dir_path(__FILE__) . 'ComboProductHelperFunctions.php';
 class ComboProductFrontendTemplate
 {
 
@@ -24,13 +25,14 @@ class ComboProductFrontendTemplate
         add_action('woocommerce_' . PRODUCT_TYPE . '_add_to_cart', array($this, 'combo_product_template'), 60);
         // add_filter('woocommerce_cart_item_price', array($this, 'add_custom_options_from_session_into_cart'), 1, 3);
         // add_action('wp_enqueue_scripts', array($this, 'combo_product_ajax_add_to_cart_js'), 99);
-        add_action('wp_ajax_ob_cart', array($this, 'combo_product_ajax_add_to_cart'), 1);
-        add_action('wp_ajax_nopriv_ob_cart', array($this, 'combo_product_ajax_add_to_cart'), 1);
+        add_action('wp_ajax_combo_product_add_to_cart', array($this, 'combo_product_ajax_add_to_cart'), 1);
+        add_action('wp_ajax_nopriv_combo_product_add_to_cart', array($this, 'combo_product_ajax_add_to_cart'), 1);
 
     }
 
     public function get_custom_cart_items_from_session($item, $values, $key)
     {
+
         if (array_key_exists('combo_product_custom_data', $values)) {
             $item['combo_product_custom_data'] = $values['combo_product_custom_data'];
         }
@@ -111,6 +113,7 @@ class ComboProductFrontendTemplate
     // TO FIX
     public function combo_product_template()
     {
+        ComboProductHelperFunctions::help();
         global $product;
         // if ($product->get_type() === 'pickandmix') {
         $selectedTag = get_post_meta($product->get_id(), '_combo_product_tag');
