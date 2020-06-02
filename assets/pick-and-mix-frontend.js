@@ -1,72 +1,71 @@
 
+// DATA PASSED IN 
+const {available_variations, attributes, related_products,variation_custom_properties, product_id, ajax_url} = data
 
-let price = document.querySelector('.price')
-let totalProductAllowed;
+// GLOBAL VARIABLES 
+let totalProductAllowed = 0;
 let productsToSelect;
 let selected_variation={}
-let bundle_products=[] 
+let childProducts = []
 let quantity = 1;
 let attributeName='';
 
 
-// Get data passed in
-const {available_variations, attributes, related_products,variation_custom_properties, product_id, ajax_url} = data
+// GLOBAL DOM ELEMENTS
+let quantityWrapper = document.querySelector('.woocommerce-variation-add-to-cart .quantity');
+let priceDisplay = document.querySelector('.price')
+let variationSelect; 
+let resetVariationButton = document.querySelector('.reset_variations')
+let childProductsDisplay = document.getElementById('related-products')
+let variationInfoAlert = document.getElementById('variation-alert')
+let childProductSelectFields =  document.querySelectorAll('.related-product-select')
+let childProductNameFields;
+let submitFormButton = document.querySelector('.single_add_to_cart_button')
+let initialPriceHTML;
 
-// save price HTML
-let priceHTML = price.innerHTML
-// ON Change
-
-const findCurrentProductVariation = (attribute, value) => {
-    const selectedVariation = available_variations.find((variation) =>  variation.attributes[`attribute_${attribute}`] == value)
-
-    return selectedVariation
+//GET VARIATION SELECT ELEMENT
+if (Object.keys(attributes).length > 0){
+    attributeName = Object.keys(attributes)[0].toLowerCase()
+    variationSelect = document.getElementById(attributeName)
 }
 
-const quanitityWrapper = document.querySelector('.woocommerce-variation-add-to-cart .quantity')
+
+//////// /// FUNCTIONS RELATED TO UPDATING THE GLOBAL STATE VALUES /// /////////
 
 
-const currentQuantity = quanitityWrapper.querySelector('.qty')
+// CLEARS THE CHILD STATE VALUE
+const clearChildProductState = () => {
+    childProducts = []
+}
 
-currentQuantity.value = 1
-
-quanitityWrapper.querySelector('.plus').addEventListener('click',()=>{
-    
-    quantity += 1
-})
-
-quanitityWrapper.querySelector('.minus').addEventListener('click',()=>{
-    quantity -= 1
-})
-currentQuantity.addEventListener("change", () => {
-    quantity = currentQuantity.value + 1
-})
-
-
-
-
-
-
-//Updates the products bundled for the form.
-const updateBundleState = (data) => {
+// UPDATES THE STATE OF THE CHILD PRODUCTS // 
+const updateChildProductState = (data) => {
     if (data.value === 0 ){
         // Update this to use product ID
-        bundle_products.filter((product) => product.name !== data.name)
+        childProducts.filter((product) => product.name !== data.name)
     }else{
-       const productIndex =  bundle_products.findIndex((product) => product.name == data.name)
+       const productIndex =  childProducts.findIndex((product) => product.name == data.name)
        
        if(productIndex !== -1){
-           bundle_products[productIndex].value = data.value
+           childProducts[productIndex].value = data.value
        }else{
-           bundle_products.push(data)
+           childProducts.push(data)
        }
     }
 }
 
-const clearBundleState = () => {
-    bundle_products = []
+// UPDATES THE STATE OF TOTAL NUMBER OF CHILD PRODUCTS WHICH CAN BE SELECTED
+const updateChildProductsToSelectState  = () => {
+    productsToSelect = totalProductAllowed
+    if(childProductSelectFields.length > 0){
+        childProductSelectFields.forEach((dropdown)=>{
+            productsToSelect -= dropdown.value
+        })
+    }
 }
 
-const updateVariationState = (data) => {
+// UPDATES THE VARIATION STATE VALUE 
+const updateVariationState = (data={},clearState=false) => {
     if (data.variation_id){
         selected_variation = data
     }else{
@@ -75,69 +74,197 @@ const updateVariationState = (data) => {
 }
 
 
+// //// FUNCTIONS FOR GENERATING/ REMOVING  DOM ELEMENTS //// ////
 
+//Hides all information related to the child products if they exist on the page
+const hideChildProducts = () =>{
+    childProductsDisplay.innerHTML = ''
+    if(variationInfoAlert){
+        variationInfoAlert.innerHTML = ''
+    }
+    }
 
-const populateRelatedProductsSelect =  (numberToPopulate) => {
-    // populate all dropdowns with option values
-    let dropdowns =  document.querySelectorAll('.related-product-select')
+// GENERATES THE DOM ELEMENTS FOR THE CHILD PRODUCTS //
+const showChildProducts = () => {
+    clearFormState()
+    if(variationInfoAlert){
+    variationInfoAlert.innerHTML += `<div class='woocommerce-message'> You may pick a total of ${totalProductAllowed} items</div>`
+    related_products.forEach((item,index)=> {
+        childProductsDisplay.innerHTML += `<div class="related-product-data">
+        <span class="bundle-product-name">
+        ${item}
+    </span>
+            <select class="related-product-select"> 
+            </select>
+        </div>`
+    }) 
+
+    }
+
+} 
+
+/// VALIDATE WHETHER THE FOR INPUTS CURRENTLY IN THE STATE //
+const validateForm = () => {
+    const validVariation = Object.keys(selected_variation).length !== 0
+    let totalBundleProductsCount =0 
+    let validBundleState = false
+
+    if(childProducts.length > 0){
+        totalBundleProductsCount = childProducts.reduce((acc,curr) => acc+= parseInt(curr.value),0)
+        validBundleState = totalBundleProductsCount == totalProductAllowed;
+    }
     
-    if(dropdowns.length > 0){
-        dropdowns.forEach((dropdown,index) =>{
-        // if it has a value selected in it repopulate with values below what is selected
-        
+    submitFormButton.disabled = validVariation == true && validBundleState == true ? false : true
+
+}
+
+
+/// POPULATES THE CHILD PRODUCT SELECT ELEMENTS WITH THE CORRECT NUMBER /// 
+const populateChildProductsSelect =  () => {
+    // populate all child selects with option values
+    getChildProductSelectFields();
+    if(childProductSelectFields.length > 0){
+        childProductSelectFields.forEach((dropdown,index) =>{
+        // if it has a value selected in it repopulate with values below what is selected and above (upto maximum possible to select)
         if (dropdown.value > 0){
-            const currentValue = dropdown.value
-            const totalLeft = parseInt(currentValue) + parseInt(numberToPopulate)
+            const currentSelectedValue = dropdown.value
+            const totalChildProductSelectsRemaining = parseInt(currentSelectedValue) + parseInt(productsToSelect)
+            // clear all current dropdown values
             dropdown.innerHTML=''
-            for (let i =0; i<=totalLeft; i++){
+            for (let i =0; i<=totalChildProductSelectsRemaining; i++){
                 let option =  `<option value=${i}>${i}</option>`
                 dropdown.innerHTML+=option
                 }
-            dropdown.querySelectorAll(`select option`)[currentValue].selected = true
-          
+            // reselect the value which was orignially selected.
+            dropdown.querySelectorAll('select option')[currentSelectedValue].selected = true
+
+            // if there was no number selected for this dropdown just populate with the total amount available to select.
             }else{
+                
                 dropdown.innerHTML=''
-      
-        for (let i =0; i<=numberToPopulate; i++){
-           
-            let option =  `<option value=${i}>${i}</option>`
-            dropdown.innerHTML+=option
+                for (let i =0; i<=productsToSelect; i++){
+                let option =  `<option value=${i}>${i}</option>`
+                 dropdown.innerHTML+=option
             }
         }
         }) 
     }
 }
 
-const updateProductsToSelect  = () => {
-    let dropdowns =  document.querySelectorAll('.related-product-select')
-    if(dropdowns.length > 0){
-        productsToSelect = totalProductAllowed
-        dropdowns.forEach((dropdown)=>{
-            productsToSelect -= dropdown.value
-        })
+
+// UPDATE PRICE DISPLAY // 
+const updatePriceHTML = (htmlInput) => {
+    if(priceDisplay){
+        priceDisplay.innerHTML = htmlInput
+     }
+    
+}
+
+// RESET PRICE HTML TO ORIGINAL VALUE//
+const resetPriceHTML =  () =>{
+    if(priceDisplay && variationSelect){
+        if(!variationSelect.value){
+        priceDisplay.innerHTML = initialPriceHTML
+        const secondaryPriceDisplay = document.querySelector('.woocommerce-variation.single_variation')
+        if(secondaryPriceDisplay){
+            secondaryPriceDisplay.style.display = 'none'
+        }
+        }
+     }
+}
+
+
+
+/// // MISC GETTER FUNCTIONS  // /// 
+
+// FIND THE CURRENT CHILD PRODUCT NAME FROM AN INDEX 
+const getChildProductName = (index=0) => {
+    // make sure index is valid and that the  array exists
+    if(childProductNameFields.length > 0 && index < childProductNameFields.length -1 ){
+        return childProductNameFields[index].textContent.trim()
+    }else{
+        return ''
     }
 }
 
-const relatedProductSelectEventListeners = (shouldRemove) => {
-    // add/Remove event listners from this component
-    let dropdowns =  document.querySelectorAll('.related-product-select')
-    let bundleProductNames =  document.querySelectorAll('.bundle-product-name')
-    
-    if(dropdowns.length > 0){
-        dropdowns.forEach((dropdown,index) =>{
-            if (!shouldRemove){
-                dropdown.value
+
+/// GET INITIAL PRICE HTML 
+const getInitialPriceHTML = () => {
+    if(priceDisplay){
+       initialPriceHTML = priceDisplay.innerHTML
+    }else{
+        initialPriceHTML = '<div></div>'
+    }
+}
+
+
+/// GET CHILD PRODUCT SELECT FEILDS 
+const getChildProductSelectFields = () => {
+   childProductSelectFields =  document.querySelectorAll('.related-product-select')
+   childProductNameFields =  document.querySelectorAll('.bundle-product-name')
+}
+
+
+/// FIND THE CURRENT SELECTED DATA FROM AN ATTRIBUTE NAME 
+const findCurrentProductVariation = (attribute, value) => {
+    const rawVarationData = available_variations.find((variation) =>  variation.attributes[`attribute_${attribute}`] == value)
+    return rawVarationData
+ }
+ 
+
+
+///// ////  GLOBAL APP STATE FUNCTIONS ///  ///// 
+
+/// CLEAR APP STATE -> DOM ELEMENTS AND STATE ELEMENTS /// 
+const clearFormState = () => {
+    hideChildProducts()
+    updateVariationState(clearState=true)
+    clearChildProductState()
+    resetPriceHTML()
+    validateForm()
+}
+
+/// SET APP STATE -> DOM ELEMENTS AND STATE ELEMENTS //// 
+const setFormState = () => {
+    if(variationSelect){
+    const rawVarationData = findCurrentProductVariation( attributeName,variationSelect.value)
+    totalProductAllowed = variation_custom_properties[rawVarationData.variation_id]
+    updateChildProductsToSelectState()
+    updatePriceHTML(rawVarationData.price_html)
+    showChildProducts()
+    populateChildProductsSelect()
+    setChildProductSelectEventListeners()
+    updateVariationState({variation_id:rawVarationData.variation_id, rawVarationData:rawVarationData.attributes})
+    clearChildProductState()
+    validateForm()
+    }
+}
+
+
+//  ////  EVENT LISTENER FUNCTIONS / ///  ///// 
+
+/// EVENT LISTENER FOR CHILD PRODUCT SELECT /// 
+const setChildProductSelectEventListeners = (remove=false) => {
+    // add/Remove event listeners from the child select fields
+
+    if(childProductSelectFields.length > 0 && childProductNameFields.length > 0){
+        childProductSelectFields.forEach((dropdown,index) =>{
+            if (!remove){
+       
             dropdown.addEventListener('change', ()=>{
-                updateProductsToSelect();
-                updateBundleState({name:bundleProductNames[index].textContent.trim(), value:dropdown.value})
-                populateRelatedProductsSelect(productsToSelect);
+                const childProductName = getChildProductName(index)
+                updateChildProductsToSelectState();
+                updateChildProductState({name:childProductName, value:dropdown.value})
+                populateChildProductsSelect()
                 validateForm()
             })
+
         }else{
             clearBundleState()
             validateForm()
             dropdown.removeEventListener()
         }
+        
     })
     
     }
@@ -145,133 +272,82 @@ const relatedProductSelectEventListeners = (shouldRemove) => {
 
 }
 
-const showRelatedProducts = (isHidden, totalProductAllowed=0 ) => {
-    let relatedProductsBox = document.getElementById('related-products')
-    let variationAlert = document.getElementById('variation-alert')
-    relatedProductsBox.innerHTML = ''
-    variationAlert.innerHTML = ''
 
-    if(!isHidden){
-        variationAlert.innerHTML += `<div class='woocommerce-message'> You may pick a total of ${totalProductAllowed} items</div>`
-        related_products.forEach((item,index)=> {
-            relatedProductsBox.innerHTML += `<div class="related-product-data">
-            <span class="bundle-product-name">
-            ${item}
-        </span>
-                <select class="related-product-select"> 
-                </select>
-            </div>`
-        }) 
-
-    }
-} 
-
-
-// document.querySelector('.reset_variations').addEventListener('click',()=>{
-//     const event = new Event('change')
-//     variationSelect.dispatchEvent(event);
+/// EVENT LISTENER FOR THE VARIATION SELECT ELEMENT //// 
+const setVariationSelectEventListener = () => {
+    //Set event listener for on change
+    variationSelect.addEventListener('change', () => {
+        if(variationSelect.value){
+            setFormState();
+        }else{
+            clearFormState()
+        }
     
-// })
-
-
-// For Each variation (should not have more than one but this allows dynamic name setting)
-Object.keys(attributes).forEach((attribute) => {
-attributeName = attribute.toLowerCase()
-// Get select element
-let variationSelect = document.getElementById(attributeName)
-
-
-document.querySelector('.reset_variations').addEventListener('click',()=>{
-      //remove price
-    // hide notice box 
-    // hide options
-    price.innerHTML = priceHTML
-    showRelatedProducts(true)
-    updateVariationState({})
-    clearBundleState()
-    validateForm()
-    
-})
-
-
-if(variationSelect.value){
-    const variation = findCurrentProductVariation( attributeName,variationSelect.value)
-    totalProductAllowed = variation_custom_properties[variation.variation_id]
-     productsToSelect = totalProductAllowed;
-     console.log('total Product',totalProductAllowed)
+    })
+}
  
-     price.innerHTML = variation.price_html
-     showRelatedProducts(false,totalProductAllowed)
-     populateRelatedProductsSelect(totalProductAllowed)
-     relatedProductSelectEventListeners(false)
-     updateVariationState({variation_id:variation.variation_id, attributes:variation.attributes})
+
+/// QUANTITY INPUT EVENT LISTENERS  //// 
+const setQuantityEventListeners = () => {
+    if(quantityWrapper){
+       
+        const plusButton = quantityWrapper.querySelector('.plus')
+        const minusButton = quantityWrapper.querySelector('.minus')
+        const quantityField =  quantityWrapper.querySelector('.qty')
+
+        if(quantityField){
+            quantityField.value = 1
+            quantityField.addEventListener("change", () => {
+                quantity = currentQuantity.value + 1
+            })        
+        }
+        if(plusButton){
+            plusButton.addEventListener('click',()=>{
+                quantity += 1
+            })  
+        }
+        
+        if(minusButton){
+           minusButton.addEventListener('click',()=>{
+                quantity -= 1
+            })
+    
+        }
+    
+       
+    }
+    }
+    
+
+/// SET EVENT LISTENER FOR RESET VARIATION FIELD
+const setResetVarationsEventListener = () => {
+    if(resetVariationButton){
+        resetVariationButton.addEventListener('click',()=>{
+        variationSelect.value = ''
+        clearFormState()
+    })
+    }
 }
 
 
 
 
-//Set event listener for on change
-variationSelect.addEventListener('change', () => {
 
-    // get the value in the select 
-
+// RUN PROGRAMME
+if (variationSelect){
+    getInitialPriceHTML()
+    setQuantityEventListeners()
+    setVariationSelectEventListener()
+    setResetVarationsEventListener()
+    submitFormButton.disabled = true
+    //disabled wc-variation-selection-needed
     if(variationSelect.value){
-
-   const variation = findCurrentProductVariation(attributeLower,variationSelect.value)
-   
-   totalProductAllowed = variation_custom_properties[variation.variation_id]
-    productsToSelect = totalProductAllowed;
-
-    price.innerHTML = variation.price_html
-    showRelatedProducts(false,totalProductAllowed)
-    populateRelatedProductsSelect(totalProductAllowed)
-    relatedProductSelectEventListeners(false)
-    updateVariationState({variation_id:variation.variation_id, attributes:variation.attributes})
- 
+        setFormState();
+       
     }else{
-    //remove price
-    // hide notice box 
-    // hide options
-    price.innerHTML = priceHTML
-    showRelatedProducts(true)
-    updateVariationState({})
+        clearFormState();
     }
-    clearBundleState()
-    validateForm()
-    }
-)
-})
-
- console.log(data)
-
-
-console.log('attached')
-
-
-
-let submitFormButton = document.querySelector('.single_add_to_cart_button')
-submitFormButton.disabled = true
-//disabled wc-variation-selection-needed
-
-
-const validateForm = () => {
-    const validVariation = Object.keys(selected_variation).length !== 0
-    let totalBundleProductsCount =0 
-    let validBundleState = false
-
-    console.log('bundleState',validBundleState, 'variationState', validVariation)
-
-
-    if(bundle_products.length > 0){
-        totalBundleProductsCount = bundle_products.reduce((acc,curr) => acc+= parseInt(curr.value),0)
-        validBundleState = totalBundleProductsCount == totalProductAllowed;
-    }
-    
-    submitFormButton.disabled = validVariation == true && validBundleState == true ? false : true
-  
 }
-
-
 
 
 
@@ -288,7 +364,7 @@ const validateForm = () => {
                 product_id:parseInt(product_id),
                 // "add-to-cart":parseInt(product_id),
                 quantity,
-                bundle_data:JSON.stringify(bundle_products),
+                bundle_data:JSON.stringify(childProducts),
                 product_sku:'',
                 variation_id: selected_variation.variation_id
             }
@@ -309,16 +385,12 @@ const validateForm = () => {
                         window.location = response.product_url
                         
                     }else{
-                        console.log(response)
+    
                         $( document.body ).trigger( 'wc_fragments_loaded' );
                         $(document.body).trigger('added_to_cart', [response.fragments,response.cart_hash, $thisbutton]);
                         $( document.body ).trigger( 'cart_page_refreshed' );
-                        price.innerHTML = priceHTML
-                        document.getElementById(attributeName).value = ''
-                        showRelatedProducts(true)
-                        updateVariationState({})
-                        clearBundleState()
-                        validateForm()
+                        variationSelect.value = ''
+                        clearFormState()
                     }
                 }
             })
@@ -327,18 +399,6 @@ const validateForm = () => {
     })
 return false;
 })(jQuery)
-
-
-// submitFormButton.addEventListener('click', (e) => { 
-//     e.preventDefault()
-//     console.log("clicked")
- 
-//     }
-
-//     SubmitFormData(data)
-   
-
-// })
 
 
 
