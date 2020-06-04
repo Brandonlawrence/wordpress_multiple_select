@@ -2,7 +2,7 @@ jQuery(document).ready(function ($) {
   const {product_type} = backend_vars
   
   // Variable type options are valid for variable workshop.
-  $( '.show_if_variable:not(.hide_if_pickandmix)' ).addClass( `show_if_${product_type}` );
+  $( `.show_if_variable:not(.hide_if_${product_type})` ).addClass( `show_if_${product_type}` );
 
   // Trigger change
   $( 'select#product-type' ).change();
@@ -22,11 +22,12 @@ jQuery(document).ready(function ($) {
 
 
 $('body').on('woocommerce_added_attribute reload woocommerce-product-type-change', (e) => {
-  if ($('select#product-type').val() == 'pickandmix'){
+  if ($('select#product-type').val() == `${product_type}`){
+    if(!$('.product-info-text').length ){
     $('.product_attributes').prepend(
-      "<div class='product-info-text'><p>You can only have one attribute for this product type</p></|div>"
+      "<div class='product-info-text' style='padding:0 1rem;'><p>You can only have one attribute for this product type</p></|div>"
         )
-    
+    }
   let $attributeValues  = $('.woocommerce_attribute')
   if($attributeValues.length >= 1){
     $('.add_attribute').attr('disabled',true)

@@ -60,6 +60,7 @@ const updateChildProductState = (data) => {
 // UPDATES THE STATE OF TOTAL NUMBER OF CHILD PRODUCTS WHICH CAN BE SELECTED
 const updateChildProductsToSelectState  = () => {
     productsToSelect = totalProductAllowed
+    getChildProductSelectFields();
     if(childProductSelectFields.length > 0){
         childProductSelectFields.forEach((dropdown)=>{
             productsToSelect -= dropdown.value
@@ -119,7 +120,7 @@ const hideChildProducts = () =>{
 
 // GENERATES THE DOM ELEMENTS FOR THE CHILD PRODUCTS //
 const showChildProducts = () => {
-    clearFormState()
+    variationInfoAlert.innerHTML = ''
     if(variationInfoAlert){
     variationInfoAlert.innerHTML += `<div class='woocommerce-message'> You may pick a total of ${totalProductAllowed} items</div>`
     related_products.forEach((item,index)=> {
@@ -275,6 +276,7 @@ const clearFormState = () => {
 /// SET APP STATE -> DOM ELEMENTS AND STATE ELEMENTS //// 
 const setFormState = () => {
     if(variationSelect){
+    getInitialImageElement();
     const rawVarationData = findCurrentProductVariation( attributeName,variationSelect.value)
     totalProductAllowed = variation_custom_properties[rawVarationData.variation_id]
     updateChildProductsToSelectState()
@@ -284,7 +286,6 @@ const setFormState = () => {
     setChildProductSelectEventListeners()
     updateVariationState({variation_id:rawVarationData.variation_id, rawVarationData:rawVarationData.attributes})
     clearChildProductState()
-    getInitialImageElement();
     validateForm()
     }
 }
@@ -333,6 +334,7 @@ const setVariationSelectEventListener = () => {
     //Set event listener for on change
     variationSelect.addEventListener('change', () => {
         if(variationSelect.value){
+            clearFormState()
             setFormState();
         }else{
             clearFormState()
@@ -390,7 +392,6 @@ const setResetVarationsEventListener = () => {
 
 // RUN PROGRAMME
 if (variationSelect){
-    getInitialImageElement();
     getInitialPriceHTML()
     setQuantityEventListeners()
     setVariationSelectEventListener()
@@ -406,6 +407,9 @@ if (variationSelect){
 }
 
 
+// Preparing to dispatch a event to change the select element
+let changeEvent = document.createEvent("HTMLEvents")
+changeEvent.initEvent('change',false,true);
 
 
 // SEND INFO TO DATABASE
@@ -445,8 +449,10 @@ if (variationSelect){
                         $( document.body ).trigger( 'wc_fragments_loaded' );
                         $(document.body).trigger('added_to_cart', [response.fragments,response.cart_hash, $thisbutton]);
                         $( document.body ).trigger( 'cart_page_refreshed' );
-                        variationSelect.value = ''
-                        clearFormState()
+                        variationSelect.value = '';
+                        variationSelect.dispatchEvent(changeEvent)
+          
+                        
                     }
                 }
             })

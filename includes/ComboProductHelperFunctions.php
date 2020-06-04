@@ -53,7 +53,7 @@ class ComboProductHelperFunctions
             foreach ($tagged_products as $tagged_product) {
 
                 $mainImageId = $tagged_product->get_image_id();
-                $imageUrl = false;
+                $imageUrl = '';
                 if ($mainImageId) {
                     $imageUrl = wp_get_attachment_url($mainImageId);
                 }
