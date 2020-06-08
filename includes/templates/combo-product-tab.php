@@ -28,5 +28,4 @@ woocommerce_wp_text_input(array(
     <strong>for these products to appear you must save these changes.</strong>
 </div>
 </div>
-
-	</div><?php
+</div>
