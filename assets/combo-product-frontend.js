@@ -1,9 +1,9 @@
 
-// DATA PASSED IN 
+// DATA PASSED IN
 const {available_variations, attributes, related_products,variation_custom_properties, product_id, ajax_url} = data
 //used for image timeout
 var timeoutHandle = window.setTimeout(() => {},300)
-// GLOBAL VARIABLES 
+// GLOBAL VARIABLES
 let totalProductAllowed = 0;
 let productsToSelect;
 let selected_variation={}
@@ -16,7 +16,7 @@ let attributeName='';
 // GLOBAL DOM ELEMENTS
 let quantityWrapper = document.querySelector('.woocommerce-variation-add-to-cart .quantity');
 let priceDisplay = document.querySelector('.price')
-let variationSelect; 
+let variationSelect;
 let resetVariationButton = document.querySelector('.reset_variations')
 let childProductsDisplay = document.getElementById('related-products')
 let variationInfoAlert = document.getElementById('variation-alert')
@@ -41,14 +41,14 @@ const clearChildProductState = () => {
     childProducts = []
 }
 
-// UPDATES THE STATE OF THE CHILD PRODUCTS // 
+// UPDATES THE STATE OF THE CHILD PRODUCTS //
 const updateChildProductState = (data) => {
     if (data.value === 0 ){
         // Update this to use product ID
         childProducts.filter((product) => product.name !== data.name)
     }else{
        const productIndex =  childProducts.findIndex((product) => product.name == data.name)
-       
+
        if(productIndex !== -1){
            childProducts[productIndex].value = data.value
        }else{
@@ -68,7 +68,7 @@ const updateChildProductsToSelectState  = () => {
     }
 }
 
-// UPDATES THE VARIATION STATE VALUE 
+// UPDATES THE VARIATION STATE VALUE
 const updateVariationState = (data={},clearState=false) => {
     if (data.variation_id){
         selected_variation = data
@@ -88,12 +88,12 @@ const updateVariationState = (data={},clearState=false) => {
         currentImageElement.outerHTML = initialImageElement.outerHTML
     }
     }
-    
+
     //REPLACES THE MAIN VARIATION IMAGE WITH A CHILD IMAGE FOR A DURATION OF 3 SECONDS AND THEN SETS IT BACK
     const setVariationImage = (url) => {
     const imageElement = document.querySelector('.woocommerce-product-gallery__wrapper')
     const zoomButton = document.querySelector('.zoom-button')
-    
+
     if(imageElement){
         imageElement.outerHTML = `<img style="width:100%;"src="${url}" class="woocommerce-product-gallery__wrapper"/>`
         window.clearTimeout(timeoutHandle)
@@ -108,7 +108,7 @@ const updateVariationState = (data={},clearState=false) => {
         zoomButton.style.display = 'none';
     }
     }
-    
+
 
 //Hides all information related to the child products if they exist on the page
 const hideChildProducts = () =>{
@@ -128,11 +128,11 @@ const showChildProducts = () => {
         <span class="bundle-product-name">
         ${item.name}${!item.inStock ? " (Out of Stock)": ''}
     </span>
-            <select class="related-product-select">
+            <select multiple class="related-product-select">
             </select>
             
         </div>`
-    }) 
+    })
 
     const outOfStockProducts = document.querySelectorAll('.related-out-of-stock .related-product-select')
     if(outOfStockProducts.length > 0){
@@ -144,25 +144,25 @@ const showChildProducts = () => {
 
     }
 
-} 
+}
 
 /// VALIDATE WHETHER THE FOR INPUTS CURRENTLY IN THE STATE //
 const validateForm = () => {
     const validVariation = Object.keys(selected_variation).length !== 0
-    let totalBundleProductsCount =0 
+    let totalBundleProductsCount =0
     let validBundleState = false
 
     if(childProducts.length > 0){
         totalBundleProductsCount = childProducts.reduce((acc,curr) => acc+= parseInt(curr.value),0)
         validBundleState = totalBundleProductsCount == totalProductAllowed;
     }
-    
+
     submitFormButton.disabled = validVariation == true && validBundleState == true ? false : true
 
 }
 
 
-/// POPULATES THE CHILD PRODUCT SELECT ELEMENTS WITH THE CORRECT NUMBER /// 
+/// POPULATES THE CHILD PRODUCT SELECT ELEMENTS WITH THE CORRECT NUMBER ///
 const populateChildProductsSelect =  () => {
     // populate all child selects with option values
     getChildProductSelectFields();
@@ -183,24 +183,24 @@ const populateChildProductsSelect =  () => {
 
             // if there was no number selected for this dropdown just populate with the total amount available to select.
             }else{
-                
+
                 dropdown.innerHTML=''
                 for (let i =0; i<=productsToSelect; i++){
                 let option =  `<option value=${i}>${i}</option>`
                  dropdown.innerHTML+=option
             }
         }
-        }) 
+        })
     }
 }
 
 
-// UPDATE PRICE DISPLAY // 
+// UPDATE PRICE DISPLAY //
 const updatePriceHTML = (htmlInput) => {
     if(priceDisplay){
         priceDisplay.innerHTML = htmlInput
      }
-    
+
 }
 
 // RESET PRICE HTML TO ORIGINAL VALUE//
@@ -218,15 +218,15 @@ const resetPriceHTML =  () =>{
 
 
 
-/// // MISC GETTER FUNCTIONS  // /// 
+/// // MISC GETTER FUNCTIONS  // ///
 
-// GET THE CURRENT IMAGE HTML DISPLAYED 
+// GET THE CURRENT IMAGE HTML DISPLAYED
 const getInitialImageElement = () => {
     initialImageElement = document.querySelector('.woocommerce-product-gallery__wrapper')
 }
-  
 
-// FIND THE CURRENT CHILD PRODUCT NAME FROM AN INDEX 
+
+// FIND THE CURRENT CHILD PRODUCT NAME FROM AN INDEX
 const getChildProductName = (index=0) => {
     // make sure index is valid and that the  array exists
     if(childProductNameFields.length > 0 && index <= childProductNameFields.length - 1){
@@ -237,7 +237,7 @@ const getChildProductName = (index=0) => {
 }
 
 
-/// GET INITIAL PRICE HTML 
+/// GET INITIAL PRICE HTML
 const getInitialPriceHTML = () => {
     if(priceDisplay){
        initialPriceHTML = priceDisplay.innerHTML
@@ -247,24 +247,24 @@ const getInitialPriceHTML = () => {
 }
 
 
-/// GET CHILD PRODUCT SELECT FEILDS 
+/// GET CHILD PRODUCT SELECT FEILDS
 const getChildProductSelectFields = () => {
    childProductSelectFields =  document.querySelectorAll('.related-product-select')
    childProductNameFields =  document.querySelectorAll('.bundle-product-name')
 }
 
 
-/// FIND THE CURRENT SELECTED DATA FROM AN ATTRIBUTE NAME 
+/// FIND THE CURRENT SELECTED DATA FROM AN ATTRIBUTE NAME
 const findCurrentProductVariation = (attribute, value) => {
     const rawVarationData = available_variations.find((variation) =>  variation.attributes[`attribute_${attribute}`] == value)
     return rawVarationData
  }
- 
 
 
-///// ////  GLOBAL APP STATE FUNCTIONS ///  ///// 
 
-/// CLEAR APP STATE -> DOM ELEMENTS AND STATE ELEMENTS /// 
+///// ////  GLOBAL APP STATE FUNCTIONS ///  /////
+
+/// CLEAR APP STATE -> DOM ELEMENTS AND STATE ELEMENTS ///
 const clearFormState = () => {
     hideChildProducts()
     updateVariationState(clearState=true)
@@ -273,7 +273,7 @@ const clearFormState = () => {
     validateForm()
 }
 
-/// SET APP STATE -> DOM ELEMENTS AND STATE ELEMENTS //// 
+/// SET APP STATE -> DOM ELEMENTS AND STATE ELEMENTS ////
 const setFormState = () => {
     if(variationSelect){
     getInitialImageElement();
@@ -291,16 +291,16 @@ const setFormState = () => {
 }
 
 
-//  ////  EVENT LISTENER FUNCTIONS / ///  ///// 
+//  ////  EVENT LISTENER FUNCTIONS / ///  /////
 
-/// EVENT LISTENER FOR CHILD PRODUCT SELECT /// 
+/// EVENT LISTENER FOR CHILD PRODUCT SELECT ///
 const setChildProductSelectEventListeners = (remove=false) => {
     // add/Remove event listeners from the child select fields
 
     if(childProductSelectFields.length > 0 && childProductNameFields.length > 0){
         childProductSelectFields.forEach((dropdown,index) =>{
             if (!remove){
-       
+
             dropdown.addEventListener('change', ()=>{
                 const childProductName = getChildProductName(index)
                 updateChildProductsToSelectState();
@@ -320,16 +320,16 @@ const setChildProductSelectEventListeners = (remove=false) => {
             validateForm()
             dropdown.removeEventListener()
         }
-        
+
     })
-    
+
     }
 
 
 }
 
 
-/// EVENT LISTENER FOR THE VARIATION SELECT ELEMENT //// 
+/// EVENT LISTENER FOR THE VARIATION SELECT ELEMENT ////
 const setVariationSelectEventListener = () => {
     //Set event listener for on change
     variationSelect.addEventListener('change', () => {
@@ -339,15 +339,15 @@ const setVariationSelectEventListener = () => {
         }else{
             clearFormState()
         }
-    
+
     })
 }
- 
 
-/// QUANTITY INPUT EVENT LISTENERS  //// 
+
+/// QUANTITY INPUT EVENT LISTENERS  ////
 const setQuantityEventListeners = () => {
     if(quantityWrapper){
-       
+
         const plusButton = quantityWrapper.querySelector('.plus')
         const minusButton = quantityWrapper.querySelector('.minus')
         const quantityField =  quantityWrapper.querySelector('.qty')
@@ -356,25 +356,25 @@ const setQuantityEventListeners = () => {
             quantityField.value = 1
             quantityField.addEventListener("change", () => {
                 quantity = currentQuantity.value + 1
-            })        
+            })
         }
         if(plusButton){
             plusButton.addEventListener('click',()=>{
                 quantity += 1
-            })  
+            })
         }
-        
+
         if(minusButton){
            minusButton.addEventListener('click',()=>{
                 quantity -= 1
             })
-    
+
         }
-    
-       
+
+
     }
     }
-    
+
 
 /// SET EVENT LISTENER FOR RESET VARIATION FIELD
 const setResetVarationsEventListener = () => {
@@ -400,7 +400,7 @@ if (variationSelect){
     //disabled wc-variation-selection-needed
     if(variationSelect.value){
         setFormState();
-       
+
     }else{
         clearFormState();
     }
@@ -416,7 +416,7 @@ changeEvent.initEvent('change',false,true);
 (function ($) {
     $( document ).on( 'click', '.single_add_to_cart_button', function(e) {
             e.preventDefault();
-            
+
             var $thisbutton = $(this)
             const data = {
                 ...selected_variation.attributes,
@@ -443,16 +443,16 @@ changeEvent.initEvent('change',false,true);
                 success:(response) =>{
                     if(response.error & response.product_url){
                         window.location = response.product_url
-                        
+
                     }else{
-    
+
                         $( document.body ).trigger( 'wc_fragments_loaded' );
                         $(document.body).trigger('added_to_cart', [response.fragments,response.cart_hash, $thisbutton]);
                         $( document.body ).trigger( 'cart_page_refreshed' );
                         variationSelect.value = '';
                         variationSelect.dispatchEvent(changeEvent)
-          
-                        
+
+
                     }
                 }
             })
