@@ -128,7 +128,7 @@ const showChildProducts = () => {
         <span class="bundle-product-name">
         ${item.name}${!item.inStock ? " (Out of Stock)": ''}
     </span>
-            <select multiple class="related-product-select">
+            <select class="related-product-select">
             </select>
             
         </div>`
